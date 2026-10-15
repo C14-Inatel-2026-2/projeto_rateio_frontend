@@ -7,6 +7,13 @@ pipeline {
         sh 'npm ci'
       }
     }
+    stage('Build') {
+      steps {
+        sh 'npm run build'
+        archiveArtifacts artifacts: '.next/**', excludes: '.next/cache/**', fingerprint: true
+      }
+    }
+
   }
   post {
     always { cleanWs() }
