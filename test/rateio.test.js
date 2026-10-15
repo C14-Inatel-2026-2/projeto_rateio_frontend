@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularDivisaoDespesa } from './rateio';
+import { calcularDivisaoDespesa } from '../rateio';
 
 describe('calcularDivisaoDespesa', () => {
     // Padrão 1: API Definition - Cenário básico sem sobra
