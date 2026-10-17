@@ -1,16 +1,23 @@
 pipeline {
     agent any
+    tools { nodejs 'node20' }
 
     stages {
-        stage('Testes e Cobertura - Front-End') {
+        stage('Install') {
             steps {
                 sh 'npm ci'
+            }
+        }
+
+        stage('Testes e Cobertura - Front-End') {
+            steps {
                 sh 'npm run test:ci'
             }
             post {
                 always {
+                    junit allowEmptyResults: true, testResults: 'reports/junit.xml'
                     publishHTML(target: [
-                        allowMissing: false,
+                        allowMissing: true,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
                         reportDir: 'coverage',
@@ -18,6 +25,13 @@ pipeline {
                         reportName: 'Relatorio de Cobertura Front-End'
                     ])
                 }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'npm run build'
+                archiveArtifacts artifacts: '.next/**', excludes: '.next/cache/**', fingerprint: true
             }
         }
     }
