@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, afterEach, type Mock } from "vitest"
 import { criarGrupo, adicionarMembroGrupo, removerMembroGrupo } from "../grupoService"
-import { memberAc } from "better-auth/plugins/organization/access"
 
 global.fetch = vi.fn()
 
@@ -12,12 +11,12 @@ describe("grupoService ", () => {
             id: "grupo-1",
             nome: "Cmerece",
             membros: ["Ninho", "Paulinho", "Gustavinho", "Luiz"],
-        }
+        };
 
-            (fetch as Mock).mockResolvedValueOnce({
-                ok: true,
-                json: async () => grupoMock,
-            });
+        (fetch as Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => grupoMock,
+        });
 
         const resultado = await criarGrupo({
             nome: 'Cmerece',
