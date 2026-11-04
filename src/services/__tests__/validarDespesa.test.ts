@@ -55,7 +55,7 @@ describe('validarDespesa', () => {
             pagador: "Paulo",
             membrosDoGrupo: ["Paulo", "Caua"],
             estrategia: "FIXO",
-            valoresFixos: { Ana: 40, Bob: 50 }
+            valoresFixos: { Paulo: 40, Caua: 50 }
         })
 
         expect(resultado.valido).toBe(false)
