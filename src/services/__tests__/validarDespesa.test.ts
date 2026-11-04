@@ -37,9 +37,9 @@ describe('validarDespesa', () => {
         })
 
         expect(parcelas).toEqual([
-            { participantes: "Paulo", valor: 33.34 },
-            { participantes: "Gustavinho", valor: 33.34 },
-            { participantes: "Luiz", valor: 33.34 },
+            { participante: "Paulo", valor: 33.34 },
+            { participante: "Gustavinho", valor: 33.33 },
+            { participante: "Luiz", valor: 33.33 },
         ])
 
         const soma = parcelas.reduce((acc, p) => acc + Math.round(p.valor * 100), 0) / 100;
