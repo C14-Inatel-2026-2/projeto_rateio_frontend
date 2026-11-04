@@ -50,7 +50,7 @@ export function validarDespesa({
         const pertenceAoGrupo = pagadorLimpo !== "" && membrosDoGrupo.some((m) => m.trim().toLocaleLowerCase() === pagadorLimpo)
 
         if (!pertenceAoGrupo) {
-            erros.push("O pagador informado não pertence ai grupo")
+            erros.push("O pagador informado não pertence ao grupo.")
         }
     }
 
@@ -69,7 +69,7 @@ export function validarDespesa({
         participantes.length > 0
     ) {
 
-        const totalCentavos = Math.round(valor * 1000)
+        const totalCentavos = Math.round(valor * 100)
         const somaFixosCentavos = participantes.reduce((acc, participantes) => {
             const valorParticipante = valoresFixos?.[participantes] ?? 0
             return acc + Math.round(valorParticipante * 100)
@@ -111,7 +111,7 @@ export function calcularParcelasPorEstrategia({
     if (estrategia === "PESO") {
         const somaPesos = participantes.reduce((acc, p) => acc + (pesos[p] ?? 1), 0)
 
-        const parcelasCentavos = participantes.map((p) => Math.floor((totalCentavos * (pesos[p] ?? 1))) / somaPesos)
+        const parcelasCentavos = participantes.map((p) => Math.floor((totalCentavos * (pesos[p] ?? 1)) / somaPesos))
 
         const somaDistribuida = parcelasCentavos.reduce((a, b) => a + b, 0)
         let restoCentavos = totalCentavos - somaDistribuida
