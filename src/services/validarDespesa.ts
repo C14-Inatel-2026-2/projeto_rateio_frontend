@@ -84,6 +84,72 @@ export function validarDespesa({
     return { valido: erros.length === 0, erros }
 }
 
+export function calcularParcelasPorEstrategia({
+    valor,
+    participantes,
+    estrategia = 'IGUAL',
+    pesos = {},
+    valoresFixos = {}
+}: {
+    valor: number
+    participantes: string[]
+    estrategia?: EstrategiaDivisao
+    pesos?: Record<string, number>
+    valoresFixos?: Record<string, number>
+}): ParcelaParticipante[] {
+    const totalCentavos = Math.round(valor * 100)
+    const qtd = participantes.length
 
+
+    if (estrategia === "FIXO") {
+        return participantes.map((participante) => ({
+            participante,
+            valor: Number((Math.round((valoresFixos[participante] ?? 0) * 100) / 100).toFixed(2))
+        }))
+    }
+
+    if (estrategia === "PESO") {
+        const somaPesos = participantes.reduce((acc, p) => acc + (pesos[p] ?? 1), 0)
+
+        const parcelasCentavos = participantes.map((p) => Math.floor((totalCentavos * (pesos[p] ?? 1))) / somaPesos)
+
+        const somaDistribuida = parcelasCentavos.reduce((a, b) => a + b, 0)
+        let restoCentavos = totalCentavos - somaDistribuida
+
+        for (let i = 0; i < qtd && restoCentavos > 0; i++) {
+            parcelasCentavos[i] += 1
+            restoCentavos--
+        }
+
+        return participantes.map((participante, index) => ({
+            participante,
+            valor: parcelasCentavos[index] / 100,
+        }));
+    }
+
+    const baseCentavos = Math.floor(totalCentavos / qtd)
+    let restoCentavos = totalCentavos % qtd
+
+    return participantes.map((participante) => {
+        let parcela = baseCentavos
+
+        if (restoCentavos > 0) {
+            parcela += 1;
+            restoCentavos--;
+        }
+
+        return {
+            participante,
+            valor: parcela / 100
+        }
+    })
+
+
+
+
+
+
+
+}
 
 
