@@ -9,7 +9,6 @@ import {
 } from "@/src/services/validarDespesa"
 import { criarDespesa } from "@/src/services/despesaService"
 import SplitStrategyInput from "./SplitStrategyInputs"
-import { set } from "zod"
 
 interface ExpenseFormProps {
     membrosDoGrupo: string[]
