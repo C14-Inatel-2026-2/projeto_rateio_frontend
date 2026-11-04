@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rateio de despesas</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --line: #cbd2d9;
+      --bg: #f7f8f6;
+      --accent: #2f6f4f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .page {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin: 0 0 0.25rem;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0 0 2rem;
+    }
+    nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    nav a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    nav a:hover {
+      border-color: var(--accent);
+    }
+    .label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .label strong {
+      font-size: 1rem;
+    }
+    .label span {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .arrow {
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>Rateio de despesas</h1>
+    <p class="subtitle">Selecione o que deseja acessar</p>
+
+    <nav>
+      <a href="grupo.html">
+        <span class="label">
+          <strong>Grupo</strong>
+          <span>Criar grupo e gerenciar membros</span>
+        </span>
+        <span class="arrow">&rsaquo;</span>
+      </a>
+
+      <a href="despesa.html">
+        <span class="label">
+          <strong>Despesa</strong>
+          <span>Registrar uma nova despesa</span>
+        </span>
+        <span class="arrow">&rsaquo;</span>
+      </a>
+
+      <a href="saldo.html">
+        <span class="label">
+          <strong>Saldo</strong>
+          <span>Ver quanto cada membro deve ou tem a receber</span>
+        </span>
+        <span class="arrow">&rsaquo;</span>
+      </a>
+    </nav>
+  </main>
+</body>
+</html>
