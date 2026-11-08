@@ -1,10 +1,9 @@
 "use client"
 
 import React, { useState } from "react"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 import { validarCadastro } from "@/src/services/validarAuth"
 import { cadastrar } from "@/src/services/authService"
-import { tr } from "zod/locales"
 
 export default function RegisterForm() {
     const router = useRouter()
