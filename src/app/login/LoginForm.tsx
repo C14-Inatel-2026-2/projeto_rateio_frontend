@@ -3,6 +3,8 @@
 import React, { useState } from "react"
 import { validarLogin } from "@/src/services/validarAuth"
 import { login, type MembroResponse } from "@/src/services/authService"
+import { useRouter } from "next/navigation"
+import { salvarSessao } from "@/src/services/sessao"
 
 
 interface LoginFormProps {
@@ -17,6 +19,8 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     const [membroLogado, setMembroLogado] = useState<MembroResponse | null>(null)
 
     async function handleSubmit(e: React.FormEvent) {
+        const router = useRouter()
+        router.push("/grupos")
         e.preventDefault()
         setErros([])
         setMembroLogado(null)
@@ -31,8 +35,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
         setEnviando(true)
         try {
             const membro = await login({ email: email.trim(), senha })
-            setMembroLogado(membro)
-            onLoginSuccess?.(membro)
+            salvarSessao(membro)
         } catch (error) {
             const mensagem = error instanceof Error ? error.message : "Erro ao fazer login."
             setErros([mensagem])
