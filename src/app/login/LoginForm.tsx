@@ -6,10 +6,10 @@ import { login, type MembroResponse } from "@/src/services/authService"
 
 
 interface LoginFormProps {
-    onLoginSucess?: (membro: MembroResponse) => void
+    onLoginSuccess?: (membro: MembroResponse) => void
 }
 
-export default function LoginForm({ onLoginSucess }: LoginFormProps) {
+export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     const [email, setEmail] = useState("")
     const [senha, setSenha] = useState("")
     const [erros, setErros] = useState<string[]>([])
@@ -32,7 +32,7 @@ export default function LoginForm({ onLoginSucess }: LoginFormProps) {
         try {
             const membro = await login({ email: email.trim(), senha })
             setMembroLogado(membro)
-            onLoginSucess?.(membro)
+            onLoginSuccess?.(membro)
         } catch (error) {
             const mensagem = error instanceof Error ? error.message : "Erro ao fazer login."
             setErros([mensagem])
