@@ -25,7 +25,7 @@ function emailEhValido(email: string): boolean {
     return REGEX_EMAIL.test(email.trim())
 }
 
-export function ValidarCadastro({
+export function validarCadastro({
     nome,
     email,
     senha,
