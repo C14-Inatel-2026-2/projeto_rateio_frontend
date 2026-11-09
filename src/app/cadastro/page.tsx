@@ -7,7 +7,7 @@ export default function CadastroPage() {
             <h1>Criar Conta</h1>
             <RegisterForm />
             <p>
-                Já tem Conta? <link href="/login">Entrar</link>
+                Já tem Conta? <Link href="/login">Entrar</Link>
             </p>
         </main>
     )
