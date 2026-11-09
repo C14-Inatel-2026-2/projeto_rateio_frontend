@@ -1,10 +1,4 @@
-import { error } from "console"
 import { ValidacaoResultado } from "./validarGrupo"
-
-export interface validacaoResultado {
-    valido: boolean,
-    erros: string[]
-}
 
 export interface ValidarCadastroParams {
     nome: string,
@@ -21,7 +15,7 @@ export interface ValidarLoginParams {
 const TAMANHO_MINIMO_SENHA = 8
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-function emailEhValido(email: string): boolean {
+export function emailEhValido(email: string): boolean {
     return REGEX_EMAIL.test(email.trim())
 }
 
