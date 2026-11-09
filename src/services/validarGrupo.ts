@@ -1,97 +1,82 @@
-export interface ValidarCriacaoGroupoParams {
-    nome: string
-    membros: string[]
-}
-
-export interface validarAdicionarMembroParams {
-    membrosAtuais: string[]
-    novoMembro: string
-}
-
-export interface ValidarRemoverMembroParams {
-    membrosAtuais: string[]
-    membroParaRemover: string
-    possuiDespesasRegistradas: boolean
-}
+import { emailEhValido } from "./validarAuth";
+import type { MembroGrupo } from "./grupoService";
 
 export interface ValidacaoResultado {
     valido: boolean;
     erros: string[];
 }
 
+function normalizar(email: string): string {
+    return email.trim().toLocaleLowerCase()
+}
+
 export function validarCriacaoGrupo({
     nome,
-    membros,
-}: ValidarCriacaoGroupoParams): ValidacaoResultado {
-    const erros: string[] = []
-
+    emails,
+    emailCriador,
+}: {
+    nome: string,
+    emails: string[],
+    emailCriador: string,
+}): ValidacaoResultado {
+    const erros: string[] = [];
 
     if (!nome || nome.trim() === "") {
-        erros.push('Nome do grupo é obrigatório.');
+        erros.push("Nome do membro é obrigatorio.")
     }
 
+    const normalizados = emails.map(normalizar)
 
-    const membrosLimpos = Array.isArray(membros) ? membros.map((m) => m.trim()).filter((m) => m !== '') : [];
-
-    if (membrosLimpos.length < 2) {
-        erros.push('O grupo deve ter ao menos 2 membros.');
+    if (normalizados.length < 1) {
+        erros.push("Informe o e-mail de ao menos 1 membro.")
     }
 
-    const membrosNormalizados = membrosLimpos.map((m) => m.toLowerCase());
-    const possuiDuplicados =
-        new Set(membrosNormalizados).size !== membrosNormalizados.length;
-    if (possuiDuplicados) {
-        erros.push('Não é permitido adicionar membros duplicados.');
+    if (normalizados.some((email) => !emailEhValido(email))) {
+        erros.push("Há e-mail inválido na lista.")
     }
+
+    if (new Set(normalizados).size !== normalizados.length) {
+        erros.push("Não é permitido repetir membros.")
+    }
+
+    if (normalizados.includes(normalizar(emailCriador))) {
+        erros.push("Você ja faz parte do grupo; não informe seu próprio e-mail.")
+    }
+
     return {
         valido: erros.length === 0,
         erros,
     };
 }
-
 
 export function validarAdicionarMembro({
     membrosAtuais,
-    novoMembro,
-}: validarAdicionarMembroParams): ValidacaoResultado {
-    const erros: string[] = [];
-    const nomeLimpo = novoMembro ? novoMembro.trim() : '';
-
-    if (!nomeLimpo) {
-        erros.push("Nome do membro é obrigatorio.")
-    } else {
-        const jaExiste = membrosAtuais.some((m) => m.trim().toLowerCase() === nomeLimpo.toLowerCase())
-
-        if (jaExiste) {
-            erros.push('Membro já existe no grupo.')
-        }
-
-    }
-
-    return {
-        valido: erros.length === 0,
-        erros,
-    };
-}
-
-export function ValidarRemoverMembro({
-    membrosAtuais,
-    membroParaRemover,
-    possuiDespesasRegistradas
-}: ValidarRemoverMembroParams): ValidacaoResultado {
+    email,
+}: {
+    membrosAtuais: MembroGrupo[]
+    email: string
+}): ValidacaoResultado {
     const erros: string[] = []
-
-    if (possuiDespesasRegistradas) {
-        erros.push('Não é possível remover um membro de um grupo com despesas registradas.');
+    if (!email || !emailEhValido(email)) {
+        erros.push("E-mail inválido.")
+    } else if (membrosAtuais.some((m) => normalizar(m.email) === normalizar(email))) {
+        erros.push("Esse membro já está no grupo.")
     }
-
-    const existeNoGrupo = membrosAtuais.some((m) => m.trim().toLowerCase() === membroParaRemover.trim().toLowerCase())
-
-    if (!existeNoGrupo) {
-        erros.push('Membro não encontrado no grupo.');
+    return { valido: erros.length === 0, erros }
+}
+export function validarRemoverMembro({
+    membrosAtuais,
+    alvoId,
+}: {
+    membrosAtuais: MembroGrupo[]
+    alvoId: string
+}): ValidacaoResultado {
+    const erros: string[] = []
+    if (!membrosAtuais.some((m) => m.id === alvoId)) {
+        erros.push("Membro não encontrado no grupo.")
     }
-    return {
-        valido: erros.length === 0,
-        erros,
-    };
+    if (membrosAtuais.length - 1 < 2) {
+        erros.push("O grupo precisa ter ao menos 2 membros.")
+    }
+    return { valido: erros.length === 0, erros }
 }
