@@ -12,6 +12,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
+    const router = useRouter()
     const [email, setEmail] = useState("")
     const [senha, setSenha] = useState("")
     const [erros, setErros] = useState<string[]>([])
@@ -19,8 +20,6 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     const [membroLogado, setMembroLogado] = useState<MembroResponse | null>(null)
 
     async function handleSubmit(e: React.FormEvent) {
-        const router = useRouter()
-        router.push("/grupos")
         e.preventDefault()
         setErros([])
         setMembroLogado(null)
@@ -36,6 +35,9 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
         try {
             const membro = await login({ email: email.trim(), senha })
             salvarSessao(membro)
+            setMembroLogado(membro)
+            onLoginSuccess?.(membro)
+            router.push("/grupos")
         } catch (error) {
             const mensagem = error instanceof Error ? error.message : "Erro ao fazer login."
             setErros([mensagem])
