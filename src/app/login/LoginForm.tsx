@@ -3,6 +3,8 @@
 import React, { useState } from "react"
 import { validarLogin } from "@/src/services/validarAuth"
 import { login, type MembroResponse } from "@/src/services/authService"
+import { useRouter } from "next/navigation"
+import { salvarSessao } from "@/src/services/sessao"
 
 
 interface LoginFormProps {
@@ -10,6 +12,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
+    const router = useRouter()
     const [email, setEmail] = useState("")
     const [senha, setSenha] = useState("")
     const [erros, setErros] = useState<string[]>([])
@@ -31,8 +34,10 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
         setEnviando(true)
         try {
             const membro = await login({ email: email.trim(), senha })
+            salvarSessao(membro)
             setMembroLogado(membro)
             onLoginSuccess?.(membro)
+            router.push("/grupos")
         } catch (error) {
             const mensagem = error instanceof Error ? error.message : "Erro ao fazer login."
             setErros([mensagem])
