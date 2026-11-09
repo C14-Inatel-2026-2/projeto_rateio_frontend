@@ -1,66 +1,65 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL
+import { Gruppo } from "next/font/google";
+import { requisicao } from "./http";
 
-export interface GrupoResponse {
+export interface MembroGrupo {
     id: string
     nome: string
-    membros: string[]
-    possuiDespesas?: boolean
+    email: string
+}
+
+export interface GrupoResumo {
+    id: string
+    nome: string
+}
+
+export interface Grupo {
+    id: string
+    nome: string
+    membros: MembroGrupo[]
 }
 
 export interface CriarGrupoParams {
-    nome: string;
-    membros: string[]
+    nome: string
+    emails: string[]
 }
 
-export async function criarGrupo({
-    nome,
-    membros,
-}: CriarGrupoParams): Promise<GrupoResponse> {
-    const res = await fetch(`${API_BASE}/grupos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, membros }),
-    });
-    if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.message ?? 'Erro ao criar grupo.');
-    }
-    return res.json();
-}
-
-export async function adicionarMembroGrupo(
-    grupoId: string,
-    novoMembro: string
-): Promise<GrupoResponse> {
-
-    const res = await fetch(`${API_BASE}/grupos/${grupoId}/membros`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome: novoMembro }),
+export function criarGrupo(membroId: string, { nome, emails }: CriarGrupoParams): Promise<Grupo> {
+    return requisicao<Grupo>("/grupos", {
+        metodo: "POST",
+        corpo: { nome, emails },
+        membroId,
+        mensagemPadrao: "Erro ao criar grupo."
     })
-
-    if (!res.ok) {
-        const body = await res.json()
-        throw new Error(body.message ?? 'Erro ao adicionar membro no grupo.');
-    }
-
-    return res.json();
 }
 
-export async function removerMembroGrupo(
-    grupoId: string,
-    membroNome: string
-): Promise<GrupoResponse> {
-    const res = await fetch(
-        `${API_BASE}/grupos/${grupoId}/membros/${encodeURIComponent(membroNome)}`,
-        {
-            method: 'DELETE',
-        }
-    )
+export function listarGrupos(membroId: string): Promise<GrupoResumo[]> {
+    return requisicao<GrupoResumo[]>("/grupos", {
+        membroId,
+        mensagemPadrao: "Erro ao listar grupos."
+    })
+}
 
-    if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.message ?? 'Erro ao remover membro do grupo.');
-    }
-    return res.json();
+
+export function buscarGrupo(grupoId: string, membroId: string): Promise<Grupo> {
+    return requisicao<Grupo>(`/grupos/${grupoId}`, {
+        membroId,
+        mensagemPadrao: "Erro ao carregar o grupo",
+    })
+}
+
+export function adicionarMembro(grupoId: string, membroId: string, email: string): Promise<MembroGrupo> {
+    return requisicao<MembroGrupo>(`/grupos/${grupoId}/membros`, {
+        metodo: "POST",
+        corpo: { email },
+        membroId,
+        mensagemPadrao: "Erro ao adicionar membro.",
+    })
+}
+
+export function removerMembro(grupoId: string, membroId: string, alvoId: string): Promise<void> {
+    return requisicao<void>(`/grupos/${grupoId}/membros/${alvoId}`, {
+        metodo: "DELETE",
+        membroId,
+        mensagemPadrao: "Erro ao remover membro."
+    })
 }
