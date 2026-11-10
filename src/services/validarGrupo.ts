@@ -22,7 +22,7 @@ export function validarCriacaoGrupo({
     const erros: string[] = [];
 
     if (!nome || nome.trim() === "") {
-        erros.push("Nome do membro é obrigatorio.")
+        erros.push("Nome do grupo é obrigatório.")
     }
 
     const normalizados = emails.map(normalizar)
