@@ -1,4 +1,3 @@
-import { Gruppo } from "next/font/google";
 import { requisicao } from "./http";
 
 export interface MembroGrupo {

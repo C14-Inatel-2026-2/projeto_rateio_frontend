@@ -61,6 +61,7 @@ export default function GroupCreateForm({ onGroupCreated }: GroupCreateFormProps
             setErros(validacao.erros);
             return;
         }
+        setEnviando(true)
         try {
             const resposta = await criarGrupo(sessao.id, {
                 nome: nomeGrupo.trim(),
@@ -70,8 +71,6 @@ export default function GroupCreateForm({ onGroupCreated }: GroupCreateFormProps
             setGrupoCriado(resposta);
             onGroupCreated?.(resposta);
             setEmails([])
-
-            onGroupCreated?.(resposta)
         } catch (err) {
             const mensagem =
                 err instanceof Error ? err.message : 'Erro ao criar grupo.';
