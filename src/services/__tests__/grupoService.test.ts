@@ -1,53 +1,56 @@
 import { describe, it, expect, vi, afterEach, type Mock } from "vitest"
-import { criarGrupo, adicionarMembroGrupo, removerMembroGrupo } from "../grupoService"
+import { criarGrupo, listarGrupos, adicionarMembro, removerMembro } from "../grupoService"
 
 global.fetch = vi.fn()
 
-describe("grupoService ", () => {
+describe("grupoService", () => {
     afterEach(() => vi.resetAllMocks())
 
-    it("Retornar confirmação com id e lista de membros ao criar grupo com sucesso", async () => {
-        const grupoMock = {
-            id: "grupo-1",
-            nome: "Cmerece",
-            membros: ["Ninho", "Paulinho", "Gustavinho", "Luiz"],
-        };
+    it("criarGrupo deve enviar nome e emails com o membroId na URL", async () => {
+        const grupoMock = { id: "g1", nome: "Viagem", membros: [] };
+        (fetch as Mock).mockResolvedValueOnce({ ok: true, status: 201, json: async () => grupoMock })
 
-        (fetch as Mock).mockResolvedValueOnce({
-            ok: true,
-            json: async () => grupoMock,
-        });
+        const resultado = await criarGrupo("m1", { nome: "Viagem", emails: ["maria@x.com"] })
 
-        const resultado = await criarGrupo({
-            nome: 'Cmerece',
-            membros: ["Ninho", "Paulinho", "Gustavinho", "Luiz"],
-        })
-
+        const [url, opcoes] = (fetch as Mock).mock.calls[0]
         expect(resultado).toEqual(grupoMock)
-        expect(fetch).toHaveBeenCalledTimes(1)
-        expect(fetch).toHaveBeenCalledWith(
-            expect.stringContaining('/grupos'),
-            expect.objectContaining({ method: 'POST' })
-        )
+        expect(url).toContain("/grupos?membroId=m1")
+        expect(JSON.parse(opcoes.body)).toEqual({ nome: "Viagem", emails: ["maria@x.com"] })
     })
-    it('deve lançar erro quando tentar adicionar membro já existente no grupo', async () => {
+
+    it("listarGrupos deve retornar a lista de grupos do membro", async () => {
+        (fetch as Mock).mockResolvedValueOnce({ ok: true, status: 200, json: async () => [{ id: "g1", nome: "Viagem" }] })
+
+        const resultado = await listarGrupos("m1")
+
+        expect(resultado).toHaveLength(1)
+    })
+
+    it("adicionarMembro deve lançar erro quando a pessoa já está no grupo (409)", async () => {
         (fetch as Mock).mockResolvedValueOnce({
             ok: false,
-            json: async () => ({ message: 'Membro já existe no grupo.' }),
+            status: 409,
+            json: async () => ({ mensagem: "Membro repetido no grupo" }),
         })
-        await expect(adicionarMembroGrupo('grupo-1', 'Ninho')).rejects.toThrow(
-            'Membro já existe no grupo.'
-        )
+
+        await expect(adicionarMembro("g1", "m1", "maria@x.com")).rejects.toThrow("Esse membro já está no grupo.")
     })
-    it('deve lançar erro quando tentar remover membro de grupo com despesas registradas', async () => {
+
+    it("removerMembro deve resolver sem corpo quando a API responde 204", async () => {
+        (fetch as Mock).mockResolvedValueOnce({ ok: true, status: 204 })
+
+        await expect(removerMembro("g1", "m1", "m2")).resolves.toBeUndefined()
+    })
+
+    it("removerMembro deve lançar erro quando o grupo tem despesas (409)", async () => {
         (fetch as Mock).mockResolvedValueOnce({
             ok: false,
-            json: async () => ({
-                message: 'Não é permitido remover membro de grupo com despesas.',
-            }),
+            status: 409,
+            json: async () => ({ mensagem: "Grupo com despesas nao permite remover membros" }),
         })
-        await expect(removerMembroGrupo('grupo-1', 'Ninho')).rejects.toThrow(
-            'Não é permitido remover membro de grupo com despesas.'
+
+        await expect(removerMembro("g1", "m1", "m2")).rejects.toThrow(
+            "Não é possível remover membros de um grupo com despesas.",
         )
     })
 })
