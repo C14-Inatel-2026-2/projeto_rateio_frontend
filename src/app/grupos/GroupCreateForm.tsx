@@ -2,59 +2,81 @@
 
 import React, { useState } from 'react'
 import { validarCriacaoGrupo } from '@/src/services/validarGrupo'
-import { criarGrupo, type GrupoResponse } from '@/src/services/grupoService'
+import { criarGrupo, type Grupo } from '@/src/services/grupoService'
+import { obterSessao } from '@/src/services/sessao'
+
 
 interface GroupCreateFormProps {
-    onGroupCreated?: (grupo: GrupoResponse) => void;
+    onGroupCreated?: (grupo: Grupo) => void;
 }
 
 export default function GroupCreateForm({ onGroupCreated }: GroupCreateFormProps) {
 
-    const [nomeGrupo, setNomeGrupo] = useState('');
-    const [membroInput, setMembroInput] = useState('');
-    const [membros, setMembros] = useState<string[]>([]);
-    const [erros, setErros] = useState<string[]>([]);
-    const [grupoCriado, setGrupoCriado] = useState<GrupoResponse | null>(null);
+    const [nomeGrupo, setNomeGrupo] = useState("")
+    const [emailInput, setEmailInput] = useState("")
+    const [emails, setEmails] = useState<string[]>([])
+    const [erros, setErros] = useState<string[]>([])
+    const [grupoCriado, setGrupoCriado] = useState<Grupo | null>(null)
+    const [enviando, setEnviando] = useState(false)
+
     function handleAdicionarMembroNaLista() {
-        const limpo = membroInput.trim();
-        if (!limpo) return;
-        const jaExiste = membros.some(
-            (m) => m.toLowerCase() === limpo.toLowerCase()
-        );
+        const limpo = emailInput.trim();
+        if (!limpo) {
+            return
+        };
+
+        const jaExiste = emails.some((e) => e.toLocaleLowerCase() === limpo)
+
         if (jaExiste) {
-            setErros(['Membro já existe no grupo.']);
+            setErros(['Não é permitido repetir membros.']);
             return;
         }
+
         setErros([]);
-        setMembros((prev) => [...prev, limpo]);
-        setMembroInput('');
+        setEmails((prev) => [...prev, limpo]);
+        setEmailInput('');
     }
-    function handleRemoverMembroDaLista(nome: string) {
-        setMembros((prev) => prev.filter((m) => m !== nome));
+
+    function handleRemoverMembroDaLista(emailParaRemover: string) {
+        setEmails((prev) => prev.filter((m) => m !== emailParaRemover));
     }
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setErros([]);
         setGrupoCriado(null);
+
+        const sessao = obterSessao()
+        if (!sessao) {
+            setErros(["Sessão expirada. Faça login novamente."])
+            return
+        }
+
         const validacao = validarCriacaoGrupo({
             nome: nomeGrupo,
-            membros,
+            emails,
+            emailCriador: sessao.email
         });
         if (!validacao.valido) {
             setErros(validacao.erros);
             return;
         }
+        setEnviando(true)
         try {
-            const resposta = await criarGrupo({
+            const resposta = await criarGrupo(sessao.id, {
                 nome: nomeGrupo.trim(),
-                membros,
-            });
+                emails,
+            })
+
             setGrupoCriado(resposta);
             onGroupCreated?.(resposta);
+            setEmails([])
         } catch (err) {
             const mensagem =
                 err instanceof Error ? err.message : 'Erro ao criar grupo.';
             setErros([mensagem]);
+        } finally {
+            setEnviando(false)
         }
     }
 

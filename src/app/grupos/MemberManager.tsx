@@ -1,75 +1,102 @@
-'use client';
+"use client"
 
-import React, { useState } from 'react'
-import { validarAdicionarMembro, ValidarRemoverMembro } from '../../services/validarGrupo'
-import { adicionarMembroGrupo, removerMembroGrupo } from '../../services/grupoService'
+import React, { useState } from "react"
+import {
+    validarAdicionarMembro,
+    validarRemoverMembro,
+} from "@/src/services/validarGrupo"
+import {
+    adicionarMembro,
+    removerMembro,
+    type MembroGrupo,
+} from "@/src/services/grupoService"
+import { obterSessao } from "@/src/services/sessao"
 
 interface MemberManagerProps {
-    groupId: string;
-    initialMembers: string[];
-    hasRecordedExpenses?: boolean;
+    groupId: string
+    initialMembers: MembroGrupo[]
 }
 
 export default function MemberManager({
     groupId,
     initialMembers,
-    hasRecordedExpenses = false,
 }: MemberManagerProps) {
-    const [membros, setMembros] = useState<string[]>(initialMembers)
-    const [novoMembro, setNovoMembro] = useState('');
-    const [erro, setErro] = useState<string | null>(null);
-    const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null);
+    const [membros, setMembros] = useState<MembroGrupo[]>(initialMembers)
+    const [novoEmail, setNovoEmail] = useState("")
+    const [erro, setErro] = useState<string | null>(null)
+    const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
+
     async function handleAdicionarMembro(e: React.FormEvent) {
         e.preventDefault()
         setErro(null)
         setMensagemSucesso(null)
+
+        const sessao = obterSessao()
+        if (!sessao) {
+            setErro("Sessão expirada. Faça login novamente.")
+            return
+        }
+
         const validacao = validarAdicionarMembro({
             membrosAtuais: membros,
-            novoMembro,
-        });
-        if (!validacao.valido) {
-            setErro(validacao.erros[0]);
-            return;
-        }
-        const nomeLimpo = novoMembro.trim();
-        try {
-            const grupoAtualizado = await adicionarMembroGrupo(groupId, nomeLimpo);
-            setMembros(grupoAtualizado.membros);
-            setNovoMembro('');
-            setMensagemSucesso(`Membro ${nomeLimpo} adicionado com sucesso.`)
-        } catch (err) {
-            const msg =
-                err instanceof Error ? err.message : 'Erro ao adicionar membro.'
-            setErro(msg);
-        }
-    }
-    async function handleRemoverMembro(membroParaRemover: string) {
-        setErro(null);
-        setMensagemSucesso(null);
-        const validacao = ValidarRemoverMembro({
-            membrosAtuais: membros,
-            membroParaRemover,
-            possuiDespesasRegistradas: hasRecordedExpenses,
-        });
-        if (!validacao.valido) {
-            setErro(validacao.erros[0]);
-            return;
-        }
-        try {
-            const grupoAtualizado = await removerMembroGrupo(
-                groupId,
-                membroParaRemover
-            );
-            setMembros(grupoAtualizado.membros)
-            setMensagemSucesso(`Membro ${membroParaRemover} removido com sucesso.`)
-        } catch (err) {
-            const msg =
-                err instanceof Error ? err.message : 'Erro ao remover membro.'
-            setErro(msg);
-        }
-    }
-    return (
-        <> {/* FAZER ESSA BOMBA DE CONFIGURAÇÃO */} </>
-    )
+            email: novoEmail,
+        })
 
+        if (!validacao.valido) {
+            setErro(validacao.erros[0])
+            return
+        }
+
+        const emailLimpo = novoEmail.trim().toLowerCase()
+
+        try {
+            const membroAdicionado = await adicionarMembro(
+                groupId,
+                sessao.id,
+                emailLimpo,
+            )
+            setMembros((prev) => [...prev, membroAdicionado])
+            setNovoEmail("")
+            setMensagemSucesso(`Membro ${membroAdicionado.nome} adicionado com sucesso.`)
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : "Erro ao adicionar membro."
+            setErro(msg)
+        }
+    }
+
+    async function handleRemoverMembro(alvoId: string) {
+        setErro(null)
+        setMensagemSucesso(null)
+
+        const sessao = obterSessao()
+        if (!sessao) {
+            setErro("Sessão expirada. Faça login novamente.")
+            return
+        }
+
+        const validacao = validarRemoverMembro({
+            membrosAtuais: membros,
+            alvoId,
+        })
+
+        if (!validacao.valido) {
+            setErro(validacao.erros[0])
+            return
+        }
+
+        try {
+            await removerMembro(groupId, sessao.id, alvoId)
+            setMembros((prev) => prev.filter((m) => m.id !== alvoId))
+            setMensagemSucesso("Membro removido com sucesso.")
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : "Erro ao remover membro."
+            setErro(msg)
+        }
+    }
+
+    return (
+        <>
+            {/* FAZER ESSA BOMBA DE CONFIGURAÇÃO */}
+        </>
+    )
 }
