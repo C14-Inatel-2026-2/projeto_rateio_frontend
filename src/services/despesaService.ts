@@ -11,11 +11,10 @@ export interface ParticipanteDespesa {
 
 export interface CriarDespesaParams {
     descricao: string
-    valor: number
-    participantes: string[]
-    pagador?: string
-    estrategia?: EstrategiaDivisao
-    parcelas?: ParticipanteDespesa[]
+    valorTotal: number
+    pagadorId: string
+    estrategia: EstrategiaDivisao
+    participantes: ParticipanteDespesa[]
 }
 
 export interface ParcelaDespesa {
@@ -27,7 +26,8 @@ export interface Despesa {
     id: string
     descricao: string
     valorTotal: string
-    pagadorId: EstrategiaDivisao
+    pagadorId: string
+    estrategia: EstrategiaDivisao
     status: StatusDespesa
     data: string
     parcelas: ParcelaDespesa[]
