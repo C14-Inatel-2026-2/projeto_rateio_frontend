@@ -1,15 +1,16 @@
 "use client"
 
 import React from "react"
-import type { EstrategiaDivisao } from "@/src/services/validarDespesa"
+import type { EstrategiaDivisao } from "@/src/services/despesaService"
+import type { MembroGrupo } from "@/src/services/grupoService"
 
 interface SplitStrategyInputProps {
     estrategia: EstrategiaDivisao
-    participantes: string[]
+    participantes: MembroGrupo[]
     pesos: Record<string, number>
     valoresFixos: Record<string, number>
-    onChangePeso: (participante: string, peso: number) => void
-    onChangeValorFixo: (participante: string, valor: number) => void
+    onChangePeso: (membroId: string, peso: number) => void
+    onChangeValorFixo: (membroId: string, valor: number) => void
 }
 
 export default function SplitStrategyInput({
@@ -21,20 +22,12 @@ export default function SplitStrategyInput({
     onChangeValorFixo,
 }: SplitStrategyInputProps) {
     if (estrategia === "IGUAL") {
-        return (
-            <></>
-        )
+        return <></>
     }
 
-    if (estrategia === "PESO") {
-        return (
-            <></>
-        )
+    if (estrategia === "POR_PESO") {
+        return <></>
     }
 
-
-    return (
-        <></>
-    )
-
+    return <></>
 }
