@@ -42,3 +42,16 @@ export function RegistrarPagamento(
 }
 
 
+
+export function estornarPagamento(
+    grupoId: string,
+    pagamentoId: string,
+    membroId: string
+): Promise<{ id: string; status: StatusPagamento }> {
+    return requisicao(`/grupos/${grupoId}/pagamentos/${pagamentoId}/estorno`, {
+        metodo: "POST",
+        membroId,
+        mensagemPadrao: "Erro ao estornar pagamento."
+    })
+}
+
