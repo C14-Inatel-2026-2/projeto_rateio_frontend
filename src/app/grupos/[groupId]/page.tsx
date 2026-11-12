@@ -3,15 +3,19 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import GroupTabs, { type Aba } from "@/src/app/grupos/_components/GroupTabs"
 import MemberManager from "@/src/app/grupos/_components/membros/MemberManager"
-import ExpenseForm from "@/src/app/grupos/_components/despesas/ExpenseForm"
+import ExpensesTab from "@/src/app/grupos/_components/despesas/ExpensesTab"
 import { buscarGrupo, type Grupo } from "@/src/services/grupoService"
 import { obterSessao } from "@/src/services/sessao"
+
+const cartao = "rounded-3xl border border-slate-200 bg-white p-10 shadow-sm"
 
 export default function GroupDashboardPage() {
     const router = useRouter()
     const { groupId } = useParams<{ groupId: string }>()
     const [grupo, setGrupo] = useState<Grupo | null>(null)
+    const [aba, setAba] = useState<Aba>("despesas")
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
 
@@ -48,14 +52,25 @@ export default function GroupDashboardPage() {
 
                 {grupo && (
                     <>
-                        <section className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm">
+                        <GroupTabs ativa={aba} onChange={setAba} />
+
+                        {aba === "resumo" && (
+                            <section className={cartao}>
+                                <p className="text-base text-slate-500">Em construção.</p>
+                            </section>
+                        )}
+
+                        {aba === "despesas" && <ExpensesTab groupId={groupId} membros={grupo.membros} />}
+
+                        {aba === "extrato" && (
+                            <section className={cartao}>
+                                <p className="text-base text-slate-500">Em construção.</p>
+                            </section>
+                        )}
+
+                        <section className={aba === "membros" ? cartao : "hidden"}>
                             <h2 className="mb-6 text-2xl font-semibold text-slate-900">Membros</h2>
                             <MemberManager groupId={groupId} initialMembers={grupo.membros} />
-                        </section>
-
-                        <section className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm">
-                            <h2 className="mb-6 text-2xl font-semibold text-slate-900">Nova despesa</h2>
-                            <ExpenseForm groupId={groupId} membrosDoGrupo={grupo.membros} />
                         </section>
                     </>
                 )}
