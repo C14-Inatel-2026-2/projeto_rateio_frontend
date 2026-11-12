@@ -15,11 +15,15 @@ import { obterSessao } from "@/src/services/sessao"
 interface MemberManagerProps {
     groupId: string
     initialMembers: MembroGrupo[]
+    onMembrosChange?: (membros: MembroGrupo[]) => void
+    onLeave?: () => void
 }
 
 export default function MemberManager({
     groupId,
     initialMembers,
+    onMembrosChange,
+    onLeave,
 }: MemberManagerProps) {
     const [membros, setMembros] = useState<MembroGrupo[]>(initialMembers)
     const [novoEmail, setNovoEmail] = useState("")
@@ -55,7 +59,9 @@ export default function MemberManager({
                 sessao.id,
                 emailLimpo,
             )
-            setMembros((prev) => [...prev, membroAdicionado])
+            const novaLista = [...membros, membroAdicionado]
+            setMembros(novaLista)
+            onMembrosChange?.(novaLista)
             setNovoEmail("")
             setMensagemSucesso(`Membro ${membroAdicionado.nome} adicionado com sucesso.`)
         } catch (err) {
@@ -86,7 +92,13 @@ export default function MemberManager({
 
         try {
             await removerMembro(groupId, sessao.id, alvoId)
-            setMembros((prev) => prev.filter((m) => m.id !== alvoId))
+            if (alvoId === sessao.id) {
+                onLeave?.()
+                return
+            }
+            const novaLista = membros.filter((m) => m.id !== alvoId)
+            setMembros(novaLista)
+            onMembrosChange?.(novaLista)
             setMensagemSucesso("Membro removido com sucesso.")
         } catch (err) {
             const msg = err instanceof Error ? err.message : "Erro ao remover membro."
@@ -95,6 +107,7 @@ export default function MemberManager({
     }
 
         const membrosOrdenados = [...membros].sort((a, b) => a.nome.localeCompare(b.nome))
+        const idLogado = obterSessao()?.id
 
     return (
         <div className="space-y-6">
@@ -122,7 +135,7 @@ export default function MemberManager({
                             onClick={() => handleRemoverMembro(m.id)}
                             className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
                         >
-                            Remover
+                            {m.id === idLogado ? "Sair do grupo" : "Remover"}
                         </button>
                     </li>
                 ))}
