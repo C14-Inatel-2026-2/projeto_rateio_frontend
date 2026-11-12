@@ -26,6 +26,11 @@ const MENSAGENS: Record<string, string> = {
     "Valor invalido": "Valor inválido. Confira os dados da despesa.",
     "Email ja cadastrado": "E-mail já cadastrado.",
     "Email ou senha invalidos": "E-mail ou senha inválidos.",
+    "Despesa nao encontrada": "Despesa não encontrada.",
+    "Despesa ja estornada": "Esta despesa já foi estornada.",
+    "Valor maior que a divida": "O valor informado é maior que a dívida.",
+    "Pagamento nao encontrado": "Pagamento não encontrado.",
+    "Pagamento ja estornado": "Este pagamento já foi estornado.",
 }
 
 export function traduzirMensagem(mensagem: string | undefined, padrao: string): string {
