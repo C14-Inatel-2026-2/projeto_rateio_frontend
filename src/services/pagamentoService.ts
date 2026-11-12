@@ -28,7 +28,7 @@ export interface RegistrarPagamentoParams {
     valor: number
 }
 
-export function RegistrarPagamento(
+export function registrarPagamento(
     grupoId: string,
     membroId: string,
     { paraId, valor }: RegistrarPagamentoParams
