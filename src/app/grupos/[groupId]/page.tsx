@@ -9,6 +9,7 @@ import ExpensesTab from "@/src/app/grupos/_components/despesas/ExpensesTab"
 import { buscarGrupo, type Grupo } from "@/src/services/grupoService"
 import { obterSessao } from "@/src/services/sessao"
 import PaymentForm from "@/src/app/grupos/_components/pagamentos/PaymentForm"
+import SummaryTab from "@/src/app/grupos/_components/resumo/SummaryTab"
 
 const cartao = "rounded-3xl border border-slate-200 bg-white p-10 shadow-sm"
 
@@ -16,7 +17,7 @@ export default function GroupDashboardPage() {
     const router = useRouter()
     const { groupId } = useParams<{ groupId: string }>()
     const [grupo, setGrupo] = useState<Grupo | null>(null)
-    const [aba, setAba] = useState<Aba>("despesas")
+    const [aba, setAba] = useState<Aba>("resumo")
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
     const [pagando, setPagando] = useState(false)
@@ -56,11 +57,7 @@ export default function GroupDashboardPage() {
                     <>
                         <GroupTabs ativa={aba} onChange={setAba} />
 
-                        {aba === "resumo" && (
-                            <section className={cartao}>
-                                <p className="text-base text-slate-500">Em construção.</p>
-                            </section>
-                        )}
+                        {aba === "resumo" && <SummaryTab groupId={groupId} membros={grupo.membros} />}
 
                         {aba === "despesas" && <ExpensesTab groupId={groupId} membros={grupo.membros} />}
 
