@@ -55,3 +55,12 @@ export function estornarPagamento(
     })
 }
 
+export function consultarExtrato(
+    grupoId: string,
+    membroId: string,
+): Promise<ItemExtrato[]> {
+    return requisicao<ItemExtrato[]>(`/grupos/${grupoId}/extrato`, {
+        membroId,
+        mensagemPadrao: "Erro ao consultar extrato do grupo."
+    })
+}
