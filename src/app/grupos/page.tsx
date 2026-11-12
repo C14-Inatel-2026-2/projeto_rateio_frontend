@@ -18,17 +18,18 @@ export default function MeusGrupos() {
         router.push("/login")
     }
 
-    useEffect(() => {
+      useEffect(() => {
         const sessao = obterSessao()
         if (!sessao) {
             router.replace("/login")
             return
         }
 
-        setNomeUsuario(sessao.nome)
-
         listarGrupos(sessao.id)
-            .then((lista) => setGrupos([...lista].sort((a, b) => a.nome.localeCompare(b.nome))))
+            .then((lista) => {
+                setNomeUsuario(sessao.nome)
+                setGrupos([...lista].sort((a, b) => a.nome.localeCompare(b.nome)))
+            })
             .catch((err) => {
                 const mensagem = err instanceof Error ? err.message : "Erro ao listar grupos."
                 if (mensagem.includes("Membro nao encontrado")) {
@@ -36,6 +37,7 @@ export default function MeusGrupos() {
                     router.replace("/login")
                     return
                 }
+                setNomeUsuario(sessao.nome)
                 setErro(mensagem)
             })
             .finally(() => setCarregando(false))
