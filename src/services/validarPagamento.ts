@@ -36,7 +36,7 @@ export function ValidarPagamento({
     }
 
     if (typeof valor !== "number" || !(valor > 0) || !temNoMaximoDuasCasas(valor)) {
-        erros.push("Valor deve ser maior que zero, com no máximo 2 casas décimais.")
+        erros.push("Valor deve ser maior que zero, com no máximo 2 casas decimais.")
     }
 
     if (
@@ -44,9 +44,7 @@ export function ValidarPagamento({
         Array.isArray(transferenciaSugerida)
     ) {
         const dividaSugerida = transferenciaSugerida?.find(
-            (t) => {
-                t.deId === pagadorId && t.paraId === paraId
-            }
+            (t) => t.deId === pagadorId && t.paraId === paraId
         )
 
         if (!dividaSugerida) {
