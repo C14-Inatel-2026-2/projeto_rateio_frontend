@@ -17,12 +17,10 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     const [senha, setSenha] = useState("")
     const [erros, setErros] = useState<string[]>([])
     const [enviando, setEnviando] = useState(false)
-    const [membroLogado, setMembroLogado] = useState<MembroResponse | null>(null)
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         setErros([])
-        setMembroLogado(null)
 
         const validacao = validarLogin({ email, senha })
 
@@ -35,7 +33,6 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
         try {
             const membro = await login({ email: email.trim(), senha })
             salvarSessao(membro)
-            setMembroLogado(membro)
             onLoginSuccess?.(membro)
             router.push("/grupos")
         } catch (error) {
