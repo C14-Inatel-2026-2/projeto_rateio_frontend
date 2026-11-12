@@ -8,6 +8,7 @@ import MemberManager from "@/src/app/grupos/_components/membros/MemberManager"
 import ExpensesTab from "@/src/app/grupos/_components/despesas/ExpensesTab"
 import { buscarGrupo, type Grupo } from "@/src/services/grupoService"
 import { obterSessao } from "@/src/services/sessao"
+import PaymentForm from "@/src/app/grupos/_components/pagamentos/PaymentForm"
 
 const cartao = "rounded-3xl border border-slate-200 bg-white p-10 shadow-sm"
 
@@ -18,6 +19,7 @@ export default function GroupDashboardPage() {
     const [aba, setAba] = useState<Aba>("despesas")
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
+    const [pagando, setPagando] = useState(false)
 
     useEffect(() => {
         const sessao = obterSessao()
@@ -64,7 +66,17 @@ export default function GroupDashboardPage() {
 
                         {aba === "extrato" && (
                             <section className={cartao}>
-                                <p className="text-base text-slate-500">Em construção.</p>
+                                <div className="flex items-center justify-between gap-4">
+                                    <h2 className="text-2xl font-semibold text-slate-900">Histórico do grupo</h2>
+                                    <button
+                                        type="button"
+                                        onClick={() => setPagando(true)}
+                                        className="rounded-lg bg-indigo-600 px-6 py-3 text-base font-medium text-white transition hover:bg-indigo-700"
+                                    >
+                                        + Registrar pagamento
+                                    </button>
+                                </div>
+                                <p className="mt-6 text-base text-slate-500">Em construção.</p>
                             </section>
                         )}
 
@@ -72,6 +84,15 @@ export default function GroupDashboardPage() {
                             <h2 className="mb-6 text-2xl font-semibold text-slate-900">Membros</h2>
                             <MemberManager groupId={groupId} initialMembers={grupo.membros} />
                         </section>
+
+                         {pagando && (
+                            <PaymentForm
+                                groupId={groupId}
+                                membros={grupo.membros}
+                                onPaid={() => setPagando(false)}
+                                onCancel={() => setPagando(false)}
+                            />
+                        )}
                     </>
                 )}
             </div>
