@@ -25,7 +25,7 @@ export default function GroupCreateForm({ onGroupCreated }: GroupCreateFormProps
             return
         };
 
-        const jaExiste = emails.some((e) => e.toLocaleLowerCase() === limpo)
+        const jaExiste = emails.some((e) => e.toLocaleLowerCase() === limpo.toLowerCase())
 
         if (jaExiste) {
             setErros(['Não é permitido repetir membros.']);
