@@ -28,7 +28,7 @@ export function lerSessao(cookies: string): Sessao | null {
         }
 
         return { id: dados.id, nome: String(dados.nome ?? ""), email: String(dados.email ?? "") }
-    } catch (error) {
+    } catch  {
         return null
     }
 }
