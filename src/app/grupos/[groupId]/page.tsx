@@ -6,10 +6,11 @@ import { useParams, useRouter } from "next/navigation"
 import GroupTabs, { type Aba } from "@/src/app/grupos/_components/GroupTabs"
 import MemberManager from "@/src/app/grupos/_components/membros/MemberManager"
 import ExpensesTab from "@/src/app/grupos/_components/despesas/ExpensesTab"
-import { buscarGrupo, type Grupo } from "@/src/services/grupoService"
+import { buscarGrupo, type Grupo, type MembroGrupo } from "@/src/services/grupoService"
 import { obterSessao } from "@/src/services/sessao"
 import ExtractTab from "@/src/app/grupos/_components/extrato/ExtractTab"
 import SummaryTab from "@/src/app/grupos/_components/resumo/SummaryTab"
+
 
 const cartao = "rounded-3xl border border-slate-200 bg-white p-10 shadow-sm"
 
@@ -34,6 +35,11 @@ export default function GroupDashboardPage() {
             .catch((err) => setErro(err instanceof Error ? err.message : "Erro ao carregar o grupo."))
             .finally(() => setCarregando(false))
     }, [groupId, router])
+
+
+    function handleMembrosChange(membros: MembroGrupo[]) {
+        setGrupo((atual) => (atual ? { ...atual, membros } : atual))
+    }
 
     return (
         <main className="min-h-screen bg-slate-50 px-6 py-10">
@@ -65,7 +71,12 @@ export default function GroupDashboardPage() {
 
                         <section className={aba === "membros" ? cartao : "hidden"}>
                             <h2 className="mb-6 text-2xl font-semibold text-slate-900">Membros</h2>
-                            <MemberManager groupId={groupId} initialMembers={grupo.membros} />
+                        <MemberManager
+                                groupId={groupId}
+                                initialMembers={grupo.membros}
+                                onMembrosChange={handleMembrosChange}
+                                onLeave={() => router.push("/grupos")}
+                            />
                         </section>
 
                     </>
