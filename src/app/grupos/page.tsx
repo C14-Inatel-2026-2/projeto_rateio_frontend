@@ -4,13 +4,19 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { listarGrupos, type GrupoResumo } from "@/src/services/grupoService"
-import { obterSessao } from "@/src/services/sessao"
+import { limparSessao, obterSessao } from "@/src/services/sessao"
 
 export default function MeusGrupos() {
     const router = useRouter()
     const [grupos, setGrupos] = useState<GrupoResumo[]>([])
+    const [nomeUsuario, setNomeUsuario] = useState("")
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState<string | null>(null)
+
+    function handleSair() {
+        limparSessao()
+        router.push("/login")
+    }
 
     useEffect(() => {
         const sessao = obterSessao()
@@ -19,15 +25,36 @@ export default function MeusGrupos() {
             return
         }
 
+        setNomeUsuario(sessao.nome)
+
         listarGrupos(sessao.id)
             .then((lista) => setGrupos([...lista].sort((a, b) => a.nome.localeCompare(b.nome))))
-            .catch((err) => setErro(err instanceof Error ? err.message : "Erro ao listar grupos."))
+            .catch((err) => {
+                const mensagem = err instanceof Error ? err.message : "Erro ao listar grupos."
+                if (mensagem.includes("Membro nao encontrado")) {
+                    limparSessao()
+                    router.replace("/login")
+                    return
+                }
+                setErro(mensagem)
+            })
             .finally(() => setCarregando(false))
     }, [router])
 
     return (
         <main className="min-h-screen bg-slate-50 px-6 py-10">
             <div className="mx-auto w-full max-w-4xl">
+                <div className="mb-8 flex items-center justify-between">
+                    <span className="text-base font-medium text-slate-700">Olá, {nomeUsuario}</span>
+                    <button
+                        type="button"
+                        onClick={handleSair}
+                        className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-200"
+                    >
+                        Sair
+                    </button>
+                </div>
+
                 <div className="mb-8 flex items-center justify-between gap-4">
                     <h1 className="text-4xl font-semibold text-slate-900">Meus grupos</h1>
                     <Link
