@@ -3,8 +3,8 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import MemberManager from "../MemberManager"
-import ExpenseForm from "../ExpenseForm"
+import MemberManager from "@/src/app/grupos/_components/membros/MemberManager"
+import ExpenseForm from "@/src/app/grupos/_components/despesas/ExpenseForm"
 import { buscarGrupo, type Grupo } from "@/src/services/grupoService"
 import { obterSessao } from "@/src/services/sessao"
 
