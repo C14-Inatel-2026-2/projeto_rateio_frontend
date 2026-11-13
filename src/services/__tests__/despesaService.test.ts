@@ -77,4 +77,14 @@ describe("despesaService", () => {
         expect(url).toContain("/grupos/g1/despesas/d1/estorno?membroId=m1")
         expect(opcoes.method).toBe("POST")
     })
+
+    it("estornarDespesa deve lançar erro quando a despesa já foi estornada (409)", async () => {
+        (fetch as Mock).mockResolvedValueOnce({
+            ok: false,
+            status: 409,
+            json: async () => ({ mensagem: "Despesa ja estornada" }),
+        })
+
+        await expect(estornarDespesa("g1", "d1", "m1")).rejects.toThrow("Esta despesa já foi estornada.")
+    })
 })

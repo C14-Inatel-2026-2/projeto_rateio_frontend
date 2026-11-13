@@ -44,4 +44,14 @@ describe("saldoService", () => {
 
         await expect(consultarSaldos("g-inexistente", "m1")).rejects.toThrow("Grupo não encontrado.")
     })
+
+    it("consultarQuitacao deve lançar erro traduzido quando o membro não pertence ao grupo (404)", async () => {
+        (fetch as Mock).mockResolvedValueOnce({
+            ok: false,
+            status: 404,
+            json: async () => ({ mensagem: "Membro nao encontrado" }),
+        })
+
+        await expect(consultarQuitacao("g1", "m-inexistente")).rejects.toThrow("Membro não encontrado.")
+    })
 })
