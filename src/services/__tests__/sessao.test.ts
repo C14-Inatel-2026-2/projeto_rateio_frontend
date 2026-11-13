@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { serializarSessao, lerSessao, NOME_COOKIE } from "../sessao"
+import { serializarSessao, lerSessao, salvarSessao, limparSessao, obterSessao, NOME_COOKIE } from "../sessao"
 
 const membro = { id: "uuid-1", nome: "Ana", email: "ana@x.com" }
 
@@ -28,5 +28,27 @@ describe("sessao", () => {
         const semId = encodeURIComponent(JSON.stringify({ nome: "Ana" }))
 
         expect(lerSessao(`${NOME_COOKIE}=${semId}`)).toBeNull()
+    })
+
+    it("Retornar null em obterSessao quando document não existe", () => {
+        const sessao = obterSessao()
+
+        expect(sessao).toBeNull()
+    })
+
+    it("Salvar, Obter e limpar a sessão no document.cookie", () => {
+        Object.defineProperty(globalThis, "document", {
+            value: { cookie: "" },
+            writable: true,
+            configurable: true,
+        })
+
+        salvarSessao(membro)
+        expect(obterSessao()).toEqual(membro)
+
+        limparSessao()
+        expect(document.cookie).toContain("max-age=0")
+
+        Reflect.deleteProperty(globalThis, "document")
     })
 })

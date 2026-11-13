@@ -9,7 +9,8 @@ export default defineConfig({
             provider: 'v8',
             reporter: ['text', 'html', 'cobertura', 'lcov'],
             reportsDirectory: 'coverage',
-            include: ['src/**', 'rateio.js'],
+            include: ['src/**/*.ts', 'rateio.js'],
+            exclude: ['**/*.test.ts', 'src/proxy.ts'],
         }
 
     },
