@@ -48,6 +48,16 @@ describe("pagamentoService", () => {
         expect(opcoes.method).toBe("POST")
     })
 
+    it("estornarPagamento deve lançar erro quando o pagamento já foi estornado (409)", async () => {
+        (fetch as Mock).mockResolvedValueOnce({
+            ok: false,
+            status: 409,
+            json: async () => ({ mensagem: "Pagamento ja estornado" }),
+        })
+
+        await expect(estornarPagamento("g1", "p1", "m2")).rejects.toThrow("Este pagamento já foi estornado.")
+    })
+
     it("consultarExtrato deve retornar despesas e pagamentos em ordem cronológica", async () => {
         const extratoMock = [
             { tipo: "DESPESA", id: "d1", autorId: "m1", autorNome: "Ana", valor: "100.00", status: "ATIVA", data: "2026-11-04T20:15:00Z" },
