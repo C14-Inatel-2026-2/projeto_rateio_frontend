@@ -1,5 +1,2 @@
 # INATEL_C14_PROJETO_FRONTEND
 Repositório para manter a parte de frontend do projeto da disciplina de C14 do Inatel.
-
-Prompt utilizado para a última entrega de C14:
-"Com base nos arquivos do nosso projeto em Next.js/TypeScript e nos slides da disciplina de Engenharia de Software que te enviei, dê uma analisada na nossa suíte de testes unitários no Vitest (principalmente nos serviços e no cliente HTTP) para me ajudar a confirmar se os cenários de exceção e erros de requisição estão bem cobertos. Além do que foi pedido na tarefa, gostaria que você sugerisse pontos de melhoria ou verificações extras de exceptions no código para deixar a aplicação ainda mais segura contra falhas. Depois disso, me ajude a aplicar uma refatoração simples e de baixo risco — como extrair constantes no arquivo formatarMoeda.ts no lugar de deixar valores fixos — tomando cuidado para manter as funções formatarMoeda e descreverSaldo funcionando exatamente como antes. Por fim, me guie na validação rodando o ESLint e os testes para garantir que nada quebrou antes de eu subir o commit no padrão Conventional Commits e abrir o Pull Request."
