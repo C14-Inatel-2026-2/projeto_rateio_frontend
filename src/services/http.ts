@@ -56,11 +56,18 @@ export async function requisicao<T>(
     const query = membroId ? `?membroId=${encodeURIComponent(membroId)}` : ""
     const temCorpo = corpo !== undefined
 
-    const res = await fetch(`${API_BASE}${caminho}${query}`, {
-        method: metodo,
-        headers: temCorpo ? { "Content-Type": "application/json" } : undefined,
-        body: temCorpo ? JSON.stringify(corpo) : undefined,
-    })
+    let res: Response
+
+    try {
+        res = await fetch(`${API_BASE}${caminho}${query}`, {
+            method: metodo,
+            headers: temCorpo ? { "Content-Type": "application/json" } : undefined,
+            body: temCorpo ? JSON.stringify(corpo) : undefined,
+        })
+    } catch (error) {
+        throw new ApiError("Não foi possível conectar ao servidor", 0)
+    }
+
 
     if (!res.ok) {
         const dados = await res.json().catch(() => null)

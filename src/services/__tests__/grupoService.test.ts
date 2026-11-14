@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, type Mock } from "vitest"
-import { criarGrupo, listarGrupos, adicionarMembro, removerMembro } from "../grupoService"
+import { criarGrupo, listarGrupos, buscarGrupo, adicionarMembro, removerMembro } from "../grupoService"
 
 global.fetch = vi.fn()
 
@@ -52,5 +52,16 @@ describe("grupoService", () => {
         await expect(removerMembro("g1", "m1", "m2")).rejects.toThrow(
             "Não é possível remover membros de um grupo com despesas.",
         )
+    })
+
+    it("buscarGrupo deve retornar os detalhes no grupo em /grupos/{gruposId}?membroId=", async () => {
+        const grupoMock = { id: "g1", nome: "Viagem", membros: [] };
+        (fetch as Mock).mockResolvedValueOnce({ ok: true, status: 200, json: async () => grupoMock })
+
+        const resultado = await buscarGrupo("g1", "m1")
+
+        const [url] = (fetch as Mock).mock.calls[0]
+        expect(resultado).toEqual(grupoMock)
+        expect(url).toContain("/grupos/g1?membroId=m1")
     })
 })

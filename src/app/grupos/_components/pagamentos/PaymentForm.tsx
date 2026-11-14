@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { registrarPagamento } from "@/src/services/pagamentoService"
-import { ValidarPagamento } from "@/src/services/validarPagamento"
+import { validarPagamento } from "@/src/services/validarPagamento"
 import type { TransferenciaSugerida } from "@/src/services/saldoService"
 import type { MembroGrupo } from "@/src/services/grupoService"
 import { obterSessao } from "@/src/services/sessao"
@@ -51,7 +51,7 @@ export default function PaymentForm({
 
         const valorNumerico = Number(valor)
 
-        const validacao = ValidarPagamento({
+        const validacao = validarPagamento({
             pagadorId: sessao.id,
             paraId,
             valor: valorNumerico,
