@@ -1,9 +1,7 @@
 import type { TransferenciaSugerida } from "./saldoService";
+import type { ValidacaoResultado } from "./validarGrupo";
+import { emCentavos, temNoMaximoDuasCasas } from "./formatarMoeda";
 
-export interface ValidacaoResultado {
-    valido: boolean
-    erros: string[]
-}
 
 export interface ValidarPagamentoParams {
     pagadorId: string
@@ -12,15 +10,7 @@ export interface ValidarPagamentoParams {
     transferenciaSugerida?: TransferenciaSugerida[]
 }
 
-function emCentavos(valor: number): number {
-    return Math.round(valor * 100)
-}
-
-function temNoMaximoDuasCasas(valor: number): boolean {
-    return Math.abs(valor * 100 - Math.round(valor * 100)) < 1e-9
-}
-
-export function ValidarPagamento({
+export function validarPagamento({
     pagadorId,
     paraId,
     valor,
