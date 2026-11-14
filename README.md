@@ -2,9 +2,17 @@
 
 Frontend do **Rateio**, projeto da disciplina C14 (Engenharia de Software) do Inatel.
 
+> ## 🌐 URL de produção do frontend
+>
+> ### **https://projeto-rateio-frontend.vercel.app/**
+>
+> Aplicação publicada na Vercel, consumindo a API do backend publicada no Railway
+> (`https://c14-rateio-production.up.railway.app`).
+
 ## Índice
 
 - [Descrição do projeto](#descrição-do-projeto)
+- [Ambiente de produção](#ambiente-de-produção)
 - [Requisitos funcionais](#requisitos-funcionais)
 - [Requisitos não funcionais](#requisitos-não-funcionais)
 - [Histórias de usuário e rastreabilidade](#histórias-de-usuário-e-rastreabilidade)
@@ -12,6 +20,7 @@ Frontend do **Rateio**, projeto da disciplina C14 (Engenharia de Software) do In
 - [Refactorings aplicados](#refactorings-aplicados)
 - [Como testar](#como-testar)
 - [Como executar](#como-executar)
+- [Integração e entrega contínuas](#integração-e-entrega-contínuas)
 - [Tecnologias e ferramentas](#tecnologias-e-ferramentas)
 - [Uso de IA](#uso-de-ia)
 
@@ -37,7 +46,15 @@ Cadastro / Login (Sessão Cookie) → Meus Grupos → Painel do Grupo
 
 Na aba **Resumo**, o plano de quitação sugere duas transferências: Bruno → Ana (`R$ 30,00`) e Carla → Ana (`R$ 30,00`), com atalho direto para registrar o pagamento.
 
-**Estado atual:** aplicação 100% funcional, integrada à API REST do backend, com proteção de rotas via middleware (`proxy.ts`), suíte de testes unitários automatizados cobrindo **100% das funções (`98,03%` das linhas)** da camada de serviços e deploy contínuo na **Vercel** orquestrado via **Jenkins** (`https://projeto-rateio-frontend.vercel.app`).
+**Estado atual:** aplicação 100% funcional e em produção na **Vercel** (`https://projeto-rateio-frontend.vercel.app/`), integrada à API REST do backend hospedado no Railway, com proteção de rotas via middleware (`proxy.ts`), suíte de testes unitários automatizados cobrindo **100% das funções (`98,03%` das linhas)** da camada de serviços e deploy contínuo orquestrado via **Jenkins**.
+
+## Ambiente de produção
+
+| Componente | Onde roda | Observação |
+|---|---|---|
+| **Frontend (esta aplicação)** | Vercel: **https://projeto-rateio-frontend.vercel.app/** | Deploy automático pelo Jenkins a cada alteração na `main`. |
+| Backend (API) | Railway: `https://c14-rateio-production.up.railway.app` | Repositório `INATEL_C14_PROJETO_BACKEND`. O CORS do backend aceita domínios da Vercel e `http://localhost:3000`. |
+| Banco de dados | MySQL no Railway | Acessado apenas pelo backend. |
 
 ## Requisitos funcionais
 
@@ -114,16 +131,12 @@ Seguindo o catálogo de **Refactoring** de Martin Fowler e os conceitos da disci
 **Pré-requisitos:** Node.js 20 ou superior e `npm`. Os testes são unitários e utilizam mocks (`vi.fn()`) para isolar chamadas HTTP (`fetch`), portanto **não precisam do backend em execução** nem de banco de dados.
 
 ```bash
-# Instalar dependências (reproduzível via package-lock.json)
 npm ci
 
-# Executar todos os testes unitários
 npm test -- --run
 
-# Executar uma suíte específica
 npx vitest run src/services/__tests__/despesaService.test.ts
 
-# Executar testes com relatório de cobertura V8 e JUnit XML (mesmo comando do Jenkins)
 npm run test:ci
 ```
 
@@ -147,6 +160,12 @@ Os relatórios são gerados em `reports/junit.xml` (JUnit) e `coverage/index.htm
 
 ## Como executar
 
+### Em produção
+
+A aplicação já está no ar em **https://projeto-rateio-frontend.vercel.app/**, consumindo o backend em `https://c14-rateio-production.up.railway.app`. Não é preciso instalar nada para usá-la.
+
+### Localmente
+
 1. Instale as dependências:
 
    ```bash
@@ -155,24 +174,39 @@ Os relatórios são gerados em `reports/junit.xml` (JUnit) e `coverage/index.htm
 
 2. Crie um arquivo `.env.local` na raiz do projeto apontando para a URL do backend:
 
-   | Variável | Obrigatória | Exemplo (Local / Produção) |
+   | Variável | Obrigatória | Valor |
    |---|---|---|
-   | `NEXT_PUBLIC_API_URL` | Sim | `http://localhost:8080` |
+   | `NEXT_PUBLIC_API_URL` | Sim | Local: `http://localhost:8080` · Produção: `https://c14-rateio-production.up.railway.app` |
 
    ```env
    NEXT_PUBLIC_API_URL=http://localhost:8080
    ```
 
+   Para desenvolver sem subir o backend localmente, basta apontar a variável para a URL do backend em produção. O CORS do backend aceita `http://localhost:3000`.
+
 3. Inicie o servidor de desenvolvimento ou gere o build de produção:
 
    ```bash
-   # Modo desenvolvimento (http://localhost:3000)
    npm run dev
 
-   # Build otimizado de produção e inicialização
    npm run build
    npm start
    ```
+
+   O modo de desenvolvimento sobe em `http://localhost:3000`.
+
+## Integração e entrega contínuas
+
+O `Jenkinsfile` instala as dependências, executa os testes com cobertura, compila a aplicação e, na branch `main`, publica a versão de produção na Vercel.
+
+| Etapa | Comando | Resultado |
+|---|---|---|
+| Instalação | `npm ci` | Instala as dependências a partir do `package-lock.json`. |
+| Testes e cobertura | `npm run test:ci` | Roda o Vitest e publica os relatórios JUnit e de cobertura. |
+| Build | `npm run build` | Compila a aplicação e falha o pipeline em caso de erro. |
+| Deploy | Vercel CLI | Publica em produção na Vercel, exclusivamente na branch `main`. |
+
+As credenciais do deploy (`vercel-token`, `vercel-org-id` e `vercel-project-id`) ficam no cofre de credenciais do Jenkins e nunca são versionadas.
 
 ## Tecnologias e ferramentas
 
@@ -184,17 +218,35 @@ Os relatórios são gerados em `reports/junit.xml` (JUnit) e `coverage/index.htm
 | Gerenciador de Pacotes | npm (`package-lock.json` versionado) |
 | Testes e Cobertura | Vitest 3.2, `@vitest/coverage-v8` e Testing Library |
 | Qualidade de Código | ESLint 9 (`eslint-config-next`) |
-| CI/CD e Hospedagem | Jenkins (`Jenkinsfile`) + Vercel (`Vercel CLI`) |
+| CI/CD | Jenkins (`Jenkinsfile`) e Vercel CLI |
+| Hospedagem do frontend | Vercel |
+| Hospedagem do backend | Railway (API e MySQL) |
 | Gestão Ágil e Versionamento | Jira, Git e GitHub |
 | IDE | Visual Studio Code |
 
 ## Uso de IA
 
-A Inteligência Artificial foi utilizada de forma transparente como ferramenta de apoio em planejamento arquitetural, elaboração de casos de teste unitários, configuração de CI/CD, revisão de código (*refactoring*) e estruturação documental.
+A Inteligência Artificial foi utilizada de forma transparente como ferramenta de apoio em planejamento arquitetural, elaboração de casos de teste unitários, configuração de CI/CD, revisão de código (*refactoring*), estilização das telas e estruturação documental.
 
 | Ferramenta | Finalidade | Dinâmica de Uso |
 |---|---|---|
-| Assistentes de IA (Claude / Gemini / ChatGPT) | Planejamento de integração com contratos da API, geração de cenários de teste no Vitest, configuração do estágio de deploy na Vercel no `Jenkinsfile`, identificação de *Code Smells* e documentação | Utilizada em formato de *pair programming* e consultoria técnica: a IA propunha planos, explicações e trechos de código, enquanto os integrantes escreviam, adaptavam, validavam localmente (`npm test` / `npm run build`) e realizavam os commits e revisões de Pull Request manualmente. |
+| Assistentes de IA (Claude / Gemini / ChatGPT) | Planejamento de integração com contratos da API, geração de cenários de teste no Vitest, configuração do estágio de deploy na Vercel no `Jenkinsfile`, identificação de *Code Smells*, estilização das telas e documentação | Utilizada em formato de *pair programming* e consultoria técnica: a IA propunha planos, explicações e trechos de código, enquanto os integrantes escreviam, adaptavam, validavam localmente (`npm test` / `npm run build`) e realizavam os commits e revisões de Pull Request manualmente. |
+
+### Cauã
+
+> **Escopo deste registro:** os itens abaixo referem-se às entregas realizadas por **Cauã** neste repositório. Os prompts foram resumidos e reescritos para organização; refletem o pedido feito, não o texto exato.
+
+| Ferramenta | Modelo | Finalidade |
+|---|---|---|
+| Claude (chat web) | Claude Sonnet 5.5 (`claude-sonnet-5-5`) | Estilização das telas do frontend a partir de mock-up e atualização deste `README.md` |
+
+1. **Estilização das telas do frontend**
+   > *"Me ajude a estilizar as telas do frontend com base neste mock-up."* (o mock-up foi enviado junto ao pedido)
+   - **Resultado:** a IA gerou os arquivos de estilização das telas a partir do mock-up. Cauã **modificou** esses arquivos posteriormente, ajustando cores, tamanhos dos elementos e outros detalhes visuais, antes de incorporá-los ao projeto.
+
+2. **Atualização e estruturação deste `README.md`**
+   > *"Atualize o README do frontend adicionando as informações pertinentes que estavam faltando, como a URL de produção e o registro do meu uso de IA, e corrigindo os pontos desatualizados, de modo que siga o mesmo padrão do README do backend."*
+   - **Resultado:** a IA acrescentou ao documento as informações que estavam faltando (URL de produção, ambiente de produção, seção de integração e entrega contínuas e este registro de uso de IA) e corrigiu trechos desatualizados. Cauã **revisou e ajustou** o conteúdo ao estado real do projeto antes de usar.
 
 ### Paulo Henrique Martins
 
@@ -204,29 +256,11 @@ A Inteligência Artificial foi utilizada de forma transparente como ferramenta d
 |---|---|---|
 | Google Antigravity (IDE) | Claude Opus 4.6 / Gemini | Arquitetura de rotas, *User Stories*, geração de `sessao.test.ts`, adaptação de `ExpenseForm` e `SplitStrategyInputs`, deploy no Jenkins/Vercel, auditoria de testes, *refactoring*, textos de PRs e este `README.md` |
 
-### O que foi desenvolvido à mão e validado pelo grupo
+#### O que foi desenvolvido à mão e validado pelo grupo
 - Modelagem das telas e fluxo de navegação entre Grupos, Despesas, Resumo de Saldos, Pagamentos e Extrato.
 - Adaptação fina dos contratos de requisição/resposta (`?membroId=` na query string e tratamento de erros `{ "mensagem": "..." }`) de acordo com o backend real do grupo.
 - Configuração do servidor Jenkins, criação e gerenciamento de credenciais seguras (`vercel-token`, `vercel-org-id`, `vercel-project-id`), resolução de conflitos de merge e revisão de Pull Requests no GitHub.
 - Execução manual de todos os comandos de verificação, criação de branches e organização de commits atômicos seguindo o padrão *Conventional Commits*.
-
-### André
-
-> **Escopo deste registro:** os prompts abaixo referem-se exclusivamente às entregas realizadas pelo integrante **André** neste repositório. O uso de IA pelos demais integrantes pode ser acrescentado em subseções próprias abaixo.
-
-1. **Entrega 3 — Testes Unitários (Vitest, Mocks e Cenários Negativos)**
-   > *"Com base nos arquivos do nosso front-end em Next.js/TypeScript e nos slides da disciplina de Engenharia de Software sobre testes de unidade, estou assumindo a parte de QA do grupo e preciso estruturar a nossa suíte de testes no Vitest. Dê uma analisada nos nossos arquivos de serviço (grupoService, despesaService, pagamentoService, saldoService e authService) e me ajude a criar pelo menos 4 testes unitários bem isolados: quero 2 testes puros (sem mock) focados em regras de validação e formatação, e 2 testes utilizando mocks (vi.fn() / mock do cliente HTTP) para simular o comportamento da API sem depender do back-end no ar — incluindo obrigatoriamente casos de teste negativos para garantir que o front-end trata bem falhas de requisição e entradas inválidas. Além do mínimo pedido na tarefa, aponte se existe algum caso de borda importante que estamos deixando passar nos serviços. Por fim, me ajude a organizar o commit dentro das boas práticas (test(frontend): ...)."*
-
-2. **Entrega 4 — Pipeline de CI/CD (Jenkins, Relatórios JUnit e Cobertura)**
-   > *"Considerando o nosso projeto front-end em Next.js/TypeScript com a suíte do Vitest já rodando e os conceitos de Integração Contínua vistos nos slides de Engenharia de Software, preciso montar a minha parte do pipeline de CI/CD no Jenkins (já que não podemos usar GitHub Actions na disciplina). Como sou o responsável pelos testes do front-end, me ajude a configurar o Vitest no package.json e no vitest.config para gerar um relatório de execução em formato JUnit XML e um relatório de cobertura de código (coverage) que o Jenkins consiga ler e exibir visualmente após cada build. Também preciso estruturar o stage/job de Testes no Jenkinsfile garantindo que o pipeline quebre automaticamente caso algum teste unitário falhe, além de validar se há alguma melhoria extra que podemos colocar na etapa de verificação antes de subir o commit seguindo o padrão Conventional Commits."*
-
-3. **Entrega 5 — Agile e Engenharia de Requisitos (Jira, User Stories e README)**
-   > *"Com base no escopo do nosso sistema de rateio de despesas e nos materiais da disciplina sobre Metodologias Ágeis e Engenharia de Requisitos, preciso organizar a minha contribuição para o backlog do projeto no Jira (Scrum) e na documentação do repositório. Me ajude a redigir uma User Story completa voltada para a experiência e confiabilidade do usuário no front-end, seguindo o padrão 'Como [persona], quero [ação], para [benefício]', acompanhada de critérios de aceite bem objetivos (no formato Dado/Quando/Então) que facilitem a validação nos nossos testes. Depois disso, me ajude a revisar e estruturar a documentação no README.md separando claramente a descrição da aplicação, os Requisitos Funcionais (RF) e os Requisitos Não Funcionais (RNF) — incluindo metas de qualidade, cobertura de testes e desempenho — para fechar a entrega com tudo bem alinhado entre o código e a gestão ágil."*
-
-4. **Última Entrega — Revisão de Exceções e Refatoração**
-   > *"Com base nos arquivos do nosso projeto em Next.js/TypeScript e nos slides da disciplina de Engenharia de Software que te enviei, dê uma analisada na nossa suíte de testes unitários no Vitest (principalmente nos serviços e no cliente HTTP) para me ajudar a confirmar se os cenários de exceção e erros de requisição estão bem cobertos. Além do que foi pedido na tarefa, gostaria que você sugerisse pontos de melhoria ou verificações extras de exceptions no código para deixar a aplicação ainda mais segura contra falhas. Depois disso, me ajude a aplicar uma refatoração simples e de baixo risco — como extrair constantes no arquivo formatarMoeda.ts no lugar de deixar valores fixos — tomando cuidado para manter as funções formatarMoeda e descreverSaldo funcionando exatamente como antes. Por fim, me guie na validação rodando o ESLint e os testes para garantir que nada quebrou antes de eu subir o commit no padrão Conventional Commits e abrir o Pull Request."*
-
-### Paulo Henrique Martins
 
 > **Escopo deste registro:** os prompts abaixo referem-se às entregas e atividades realizadas pelo integrante **Paulo Henrique Martins** neste repositório.
 
@@ -267,3 +301,19 @@ A Inteligência Artificial foi utilizada de forma transparente como ferramenta d
 
 12. **Estruturação e Redação deste `README.md`**
     > *"Elabore o arquivo `README.md` completo para o repositório de front-end (`INATEL_C14_PROJETO_FRONTEND`) seguindo o mesmo padrão estrutural do repositório de backend (`INATEL_C14_PROJETO_BACKEND`) e contemplando todos os requisitos obrigatórios do documento da NP2 de C14: descrição do fluxo da aplicação, tabelas de Requisitos Funcionais e Não Funcionais, Histórias de Usuário com critérios Given/When/Then e rastreabilidade com PRs e testes, metodologia e dinâmica de desenvolvimento, catálogo de Refactorings aplicados com evidências de commits, instruções de teste/execução e documentação transparente do Uso de IA."*
+
+### André
+
+> **Escopo deste registro:** os prompts abaixo referem-se exclusivamente às entregas realizadas pelo integrante **André** neste repositório. O uso de IA pelos demais integrantes pode ser acrescentado em subseções próprias abaixo.
+
+1. **Entrega 3 — Testes Unitários (Vitest, Mocks e Cenários Negativos)**
+   > *"Com base nos arquivos do nosso front-end em Next.js/TypeScript e nos slides da disciplina de Engenharia de Software sobre testes de unidade, estou assumindo a parte de QA do grupo e preciso estruturar a nossa suíte de testes no Vitest. Dê uma analisada nos nossos arquivos de serviço (grupoService, despesaService, pagamentoService, saldoService e authService) e me ajude a criar pelo menos 4 testes unitários bem isolados: quero 2 testes puros (sem mock) focados em regras de validação e formatação, e 2 testes utilizando mocks (vi.fn() / mock do cliente HTTP) para simular o comportamento da API sem depender do back-end no ar — incluindo obrigatoriamente casos de teste negativos para garantir que o front-end trata bem falhas de requisição e entradas inválidas. Além do mínimo pedido na tarefa, aponte se existe algum caso de borda importante que estamos deixando passar nos serviços. Por fim, me ajude a organizar o commit dentro das boas práticas (test(frontend): ...)."*
+
+2. **Entrega 4 — Pipeline de CI/CD (Jenkins, Relatórios JUnit e Cobertura)**
+   > *"Considerando o nosso projeto front-end em Next.js/TypeScript com a suíte do Vitest já rodando e os conceitos de Integração Contínua vistos nos slides de Engenharia de Software, preciso montar a minha parte do pipeline de CI/CD no Jenkins (já que não podemos usar GitHub Actions na disciplina). Como sou o responsável pelos testes do front-end, me ajude a configurar o Vitest no package.json e no vitest.config para gerar um relatório de execução em formato JUnit XML e um relatório de cobertura de código (coverage) que o Jenkins consiga ler e exibir visualmente após cada build. Também preciso estruturar o stage/job de Testes no Jenkinsfile garantindo que o pipeline quebre automaticamente caso algum teste unitário falhe, além de validar se há alguma melhoria extra que podemos colocar na etapa de verificação antes de subir o commit seguindo o padrão Conventional Commits."*
+
+3. **Entrega 5 — Agile e Engenharia de Requisitos (Jira, User Stories e README)**
+   > *"Com base no escopo do nosso sistema de rateio de despesas e nos materiais da disciplina sobre Metodologias Ágeis e Engenharia de Requisitos, preciso organizar a minha contribuição para o backlog do projeto no Jira (Scrum) e na documentação do repositório. Me ajude a redigir uma User Story completa voltada para a experiência e confiabilidade do usuário no front-end, seguindo o padrão 'Como [persona], quero [ação], para [benefício]', acompanhada de critérios de aceite bem objetivos (no formato Dado/Quando/Então) que facilitem a validação nos nossos testes. Depois disso, me ajude a revisar e estruturar a documentação no README.md separando claramente a descrição da aplicação, os Requisitos Funcionais (RF) e os Requisitos Não Funcionais (RNF) — incluindo metas de qualidade, cobertura de testes e desempenho — para fechar a entrega com tudo bem alinhado entre o código e a gestão ágil."*
+
+4. **Última Entrega — Revisão de Exceções e Refatoração**
+   > *"Com base nos arquivos do nosso projeto em Next.js/TypeScript e nos slides da disciplina de Engenharia de Software que te enviei, dê uma analisada na nossa suíte de testes unitários no Vitest (principalmente nos serviços e no cliente HTTP) para me ajudar a confirmar se os cenários de exceção e erros de requisição estão bem cobertos. Além do que foi pedido na tarefa, gostaria que você sugerisse pontos de melhoria ou verificações extras de exceptions no código para deixar a aplicação ainda mais segura contra falhas. Depois disso, me ajude a aplicar uma refatoração simples e de baixo risco — como extrair constantes no arquivo formatarMoeda.ts no lugar de deixar valores fixos — tomando cuidado para manter as funções formatarMoeda e descreverSaldo funcionando exatamente como antes. Por fim, me guie na validação rodando o ESLint e os testes para garantir que nada quebrou antes de eu subir o commit no padrão Conventional Commits e abrir o Pull Request."*
