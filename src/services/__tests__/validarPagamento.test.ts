@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest"
-import { ValidarPagamento } from "../validarPagamento"
+import { validarPagamento } from "../validarPagamento"
 
 const sugestoes = [
     { deId: "m2", deNome: "Bia", paraId: "m1", paraNome: "Ana", valor: "20.00" },
 ]
 
-describe("ValidarPagamento", () => {
+describe("validarPagamento", () => {
     it("deve aceitar pagamento válido igual ou menor que a dívida sugerida", () => {
-        const resultado = ValidarPagamento({
+        const resultado = validarPagamento({
             pagadorId: "m2",
             paraId: "m1",
             valor: 20,
@@ -19,7 +19,7 @@ describe("ValidarPagamento", () => {
     })
 
     it("deve rejeitar pagamento de valor maior que a dívida", () => {
-        const resultado = ValidarPagamento({
+        const resultado = validarPagamento({
             pagadorId: "m2",
             paraId: "m1",
             valor: 25,
@@ -31,7 +31,7 @@ describe("ValidarPagamento", () => {
     })
 
     it("deve rejeitar pagamento para si mesmo ou valor não positivo", () => {
-        const resultado = ValidarPagamento({
+        const resultado = validarPagamento({
             pagadorId: "m1",
             paraId: "m1",
             valor: 0,
